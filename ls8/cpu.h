@@ -17,10 +17,10 @@ struct cpu
 enum alu_op
 {
   ALU_MUL,
-  // ALU_DIV,
-  // ALU_ADD,
-  // ALU_SUB,
-  // ALU_MOD
+  ALU_DIV,
+  ALU_ADD,
+  ALU_SUB,
+  ALU_MOD
   // Add more here
 };
 
