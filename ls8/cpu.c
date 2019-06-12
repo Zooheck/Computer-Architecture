@@ -5,6 +5,8 @@
 
 #define DATA_LEN 6
 
+#define SP 7
+
 unsigned char cpu_ram_read(struct cpu *cpu)
 {
   return cpu->ram[cpu->pc];
@@ -82,18 +84,20 @@ void cpu_run(struct cpu *cpu)
   int running = 1; // True until we get a HLT instruction
   unsigned char instruction;
 
-  unsigned char operandA;
-  unsigned char operandB;
+  unsigned char operandA, operandB;
+  cpu->registers[243];
 
   while (running)
   {
     instruction = cpu->ram[cpu->pc];
-    if (instruction > 0b01111111)
+    // if (instruction > 0b01111111)
+    if (instruction >> 6 == 2)
     {
       operandA = cpu->ram[cpu->pc + 1];
       operandB = cpu->ram[cpu->pc + 2];
     }
-    else if (instruction > 0b00111111)
+    // else if (instruction > 0b00111111)
+    if (instruction >> 6 == 1)
     {
       operandA = cpu->ram[cpu->pc + 1];
     }
@@ -109,6 +113,13 @@ void cpu_run(struct cpu *cpu)
     case LDI:
       cpu->registers[operandA] = operandB;
       cpu->pc += 3;
+      break;
+    case PUSH:
+      // decrement stack pointer
+      cpu->registers[SP]--;
+      // copy the register value to the stack
+      cpu->ram[cpu->registers[SP]] = cpu->registers[operandA];
+      cpu->pc += 2;
       break;
     case MUL:
       alu(cpu, ALU_MUL, operandA, operandB);
