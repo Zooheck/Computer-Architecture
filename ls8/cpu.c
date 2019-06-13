@@ -85,19 +85,20 @@ void cpu_run(struct cpu *cpu)
   unsigned char instruction;
 
   unsigned char operandA, operandB;
+  int retaddr;
   cpu->registers[243];
 
   while (running)
   {
     instruction = cpu->ram[cpu->pc];
-    // if (instruction > 0b01111111)
-    if (instruction >> 6 == 2)
+    if (instruction > 0b01111111)
+    // if (instruction >> 6 == 2)
     {
       operandA = cpu->ram[cpu->pc + 1];
       operandB = cpu->ram[cpu->pc + 2];
     }
-    // else if (instruction > 0b00111111)
-    if (instruction >> 6 == 1)
+    else if (instruction > 0b00111111)
+    // if (instruction >> 6 == 1)
     {
       operandA = cpu->ram[cpu->pc + 1];
     }
@@ -114,11 +115,23 @@ void cpu_run(struct cpu *cpu)
       cpu->registers[operandA] = operandB;
       cpu->pc += 3;
       break;
+    case CALL:
+      retaddr = cpu->pc + 2;
+      cpu->registers[SP]--;
+      cpu->ram[cpu->registers[SP]] = retaddr;
+      cpu->pc = cpu->registers[operandA];
+      break;
+    case RET:
     case PUSH:
       // decrement stack pointer
       cpu->registers[SP]--;
       // copy the register value to the stack
       cpu->ram[cpu->registers[SP]] = cpu->registers[operandA];
+      cpu->pc += 2;
+      break;
+    case POP:
+      cpu->registers[operandA] = cpu->ram[cpu->registers[SP]];
+      cpu->registers[SP]++;
       cpu->pc += 2;
       break;
     case MUL:
