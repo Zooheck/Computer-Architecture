@@ -122,6 +122,11 @@ void cpu_run(struct cpu *cpu)
       cpu->pc = cpu->registers[operandA];
       break;
     case RET:
+      retaddr = cpu->ram[cpu->registers[SP]];
+      cpu->registers[SP]++;
+
+      cpu->pc = retaddr;
+      break;
     case PUSH:
       // decrement stack pointer
       cpu->registers[SP]--;
