@@ -72,6 +72,20 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
   case ALU_MOD:
     cpu->registers[regA] = cpu->registers[regA] % cpu->registers[regB];
     break;
+  case ALU_CMP:
+    if (cpu->registers[regA] < cpu->registers[regB])
+    {
+      cpu->fl = 0b00000100;
+    }
+    else if (cpu->registers[regA] > cpu->registers[regB])
+    {
+      cpu->fl = 0b00000010;
+    }
+    else if (cpu->registers[regA] == cpu->registers[regB])
+    {
+      cpu->fl = 0b00000001;
+    }
+    break;
     // TODO: implement more ALU ops
   }
 }
@@ -91,14 +105,13 @@ void cpu_run(struct cpu *cpu)
   while (running)
   {
     instruction = cpu->ram[cpu->pc];
+    printf("TRACE: PC: %02X  INST: %02X \n", cpu->pc, instruction);
     if (instruction > 0b01111111)
-    // if (instruction >> 6 == 2)
     {
       operandA = cpu->ram[cpu->pc + 1];
       operandB = cpu->ram[cpu->pc + 2];
     }
     else if (instruction > 0b00111111)
-    // if (instruction >> 6 == 1)
     {
       operandA = cpu->ram[cpu->pc + 1];
     }
@@ -162,6 +175,25 @@ void cpu_run(struct cpu *cpu)
     case PRN:
       printf("%d\n", cpu->registers[operandA]);
       cpu->pc += 2;
+      break;
+    case CMP:
+      alu(cpu, instruction, operandA, operandB);
+      cpu->pc += 3;
+      break;
+    case JMP:
+      cpu->pc = cpu->registers[operandA];
+      break;
+    case JNE:
+      if (cpu->fl != 1)
+        cpu->pc = cpu->registers[operandA];
+      else
+        cpu->pc += 2;
+      break;
+    case JEQ:
+      if (cpu->fl == 1)
+        cpu->pc = cpu->registers[operandA];
+      else
+        cpu->pc += 2;
       break;
     default:
       exit(1);
